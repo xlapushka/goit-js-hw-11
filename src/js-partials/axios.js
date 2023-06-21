@@ -13,16 +13,12 @@ async function getImages(page=1, keyWord) {
         orientation : 'horizontal',
         safesearch : true 
       });
-
-      const options = {
-        method: 'GET',
-        headers: {
-        }
-      };
     
-    return axios.get(`${BAS1E_URL}?key=${API_KEY}&q=${keyWord}&${params}&page=${page}&per_page=${per_page}`)
+    const resp = await axios.get(`${BASE_URL}?key=${API_KEY}&q=${keyWord}&${params}&page=${page}&per_page=${per_page}`);
+    return resp
   } catch (err) {
-    console.log (err)
+    Notiflix.Notify.failure("Something went wrong! Please try to reload.")
+    console.log(err)
   } 
 }
 
