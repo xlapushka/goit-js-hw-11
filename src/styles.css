@@ -42,7 +42,7 @@ img {
   padding-right: 15px;
 }
 
-.list {
+.list, a {
   margin: 0;
   padding: 0;
 

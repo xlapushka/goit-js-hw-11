@@ -1,6 +1,8 @@
 
 import Notiflix from 'notiflix';
-import { getImages } from './js-partials/axios'
+import SimpleLightbox from "simplelightbox";
+import { getImages } from './js-partials/axios';
+import "simplelightbox/dist/simple-lightbox.min.css";
 
 let per_page = 40;
 let currentPage = 1;
@@ -13,6 +15,7 @@ const refs = {
   list : document.querySelector('.js-list'),
   loadMoreBtn : document.querySelector('.btn')
 };
+
   
 refs.loadMoreBtn.addEventListener('click', onLoadMoreButtonClick);
 refs.formSubmit.addEventListener('submit', onFormSubmit);
@@ -48,10 +51,23 @@ async function onFormSubmit(evt) {
    if (currentPage <= Math.floor(resp.data.total/per_page)) {
       refs.loadMoreBtn.hidden = false;
     };
+
+    let lightbox = new SimpleLightbox('.gallery a');
+    let gallery = document.querySelector('.gallery');
+    
+    await gallery.addEventListener('click', showGallery);
+    
+    function showGallery(evt) {
+      evt.preventDefault();
+      console.log(lightbox);
+      // lightbox.open()
+    
+    }  
   } catch (err) {
     Notiflix.Notify.failure("Something went wrong! Please try to reload.");
     console.log(err)
-  }
+  }; 
+
 } 
 
 
@@ -62,32 +78,34 @@ function createMarkUp(arr) {
   };
 
   return arr.map(({ webformatURL, largeImageURL, tags, likes, views, comments, downloads}) => `
-  <li class="card">
-    <div class="card-thumb">
-      <img src="${webformatURL}" alt="${tags}" width="100%" loading="lazy"/>
-    </div>
-  
-    <div class="card-descr">
-      <ul class="list img-info">
-        <li class="likes">
-          <p class="p">Likes</p>
-          <span>${likes}</span>
-        </li>
-        <li class="views">
-          <p>Views</p>
-          <span>${views}</span>
-        </li>
-        <li class="comments">
-          <p>Comments</p>
-          <span>${comments}</span>
-        </li>
-        <li class="downloads">
-          <p>Downloads</p>
-          <span>${downloads}</span>
-        </li>
-      </ul>
-    </div>
-  </li> 
+ 
+  <a class="card" href="${largeImageURL}>
+      <div class="card-thumb">
+        <img src="${webformatURL}" alt="${tags}" width="100%" loading="lazy"/>
+      </div>
+     
+    
+      <div class="card-descr">
+        <ul class="list img-info">
+          <li class="likes">
+            <p class="p">Likes</p>
+            <span>${likes}</span>
+          </li>
+          <li class="views">
+            <p>Views</p>
+            <span>${views}</span>
+          </li>
+          <li class="comments">
+            <p>Comments</p>
+            <span>${comments}</span>
+          </li>
+          <li class="downloads">
+            <p>Downloads</p>
+            <span>${downloads}</span>
+          </li>
+        </ul>
+      </div> 
+  </a>    
   `).join('')
 } 
 
