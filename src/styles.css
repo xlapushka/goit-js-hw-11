@@ -42,7 +42,7 @@ img {
   padding-right: 15px;
 }
 
-.list, a {
+.list {
   margin: 0;
   padding: 0;
 
@@ -65,6 +65,11 @@ img {
 
 .hidden {
   display: none;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
 }
 
 

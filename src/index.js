@@ -13,14 +13,33 @@ const refs = {
   formSubmit : document.querySelector('#search-form'),
   formSubmitInput : document.querySelector('#search-form input'),
   list : document.querySelector('.js-list'),
-  loadMoreBtn : document.querySelector('.btn')
+  loadMoreBtn : document.querySelector('.btn'),
+  gallery : document.querySelector('.gallery')
 };
 
-  
+
 refs.loadMoreBtn.addEventListener('click', onLoadMoreButtonClick);
 refs.formSubmit.addEventListener('submit', onFormSubmit);
 
 refs.list.innerHTML = '';
+
+
+let lightbox = new SimpleLightbox('.gallery a', {
+  captionsData: 'alt',
+  captionPosition: 'bottom',
+  captionDelay: 250,
+  scrollZoom: false,
+});
+
+
+refs.gallery.addEventListener('click', evt => {
+  evt.preventDefault();
+  if (evt.target !== 'a') { 
+    return
+  }
+  
+  lightbox.open(evt.target.parentElement);
+});
 
 
 
@@ -47,27 +66,18 @@ async function onFormSubmit(evt) {
     };
     
    refs.list.insertAdjacentHTML('beforeend', createMarkUp(resp.data.hits));
+   lightbox.refresh();
 
    if (currentPage <= Math.floor(resp.data.total/per_page)) {
       refs.loadMoreBtn.hidden = false;
-    };
+    }; 
 
-    let lightbox = new SimpleLightbox('.gallery a');
-    let gallery = document.querySelector('.gallery');
+    lightbox.refresh();
     
-    await gallery.addEventListener('click', showGallery);
-    
-    function showGallery(evt) {
-      evt.preventDefault();
-      console.log(lightbox);
-      // lightbox.open()
-    
-    }  
   } catch (err) {
     Notiflix.Notify.failure("Something went wrong! Please try to reload.");
     console.log(err)
   }; 
-
 } 
 
 
@@ -79,7 +89,7 @@ function createMarkUp(arr) {
 
   return arr.map(({ webformatURL, largeImageURL, tags, likes, views, comments, downloads}) => `
  
-  <a class="card" href="${largeImageURL}>
+  <a class="card" href="${largeImageURL}">
       <div class="card-thumb">
         <img src="${webformatURL}" alt="${tags}" width="100%" loading="lazy"/>
       </div>
@@ -122,6 +132,7 @@ async function onLoadMoreButtonClick() {
       refs.loadMoreBtn.hidden = true;
     }
     refs.list.insertAdjacentHTML('beforeend', createMarkUp(resp.data.hits))
+    lightbox.refresh();
   } catch (err) {
     Notiflix.Notify.failure("Something went wrong! Please try to reload.");
     console.log(err)
