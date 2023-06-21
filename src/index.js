@@ -1,5 +1,6 @@
-const axios = require('axios').default;
+
 import Notiflix from 'notiflix';
+import { getImages } from './js-partials/axios'
 
 
 const BASE_URL ='https://pixabay.com/api/';
@@ -15,82 +16,60 @@ const refs = {
   list : document.querySelector('.js-list'),
   loadMoreBtn : document.querySelector('.btn')
 };
-
-refs.loadMoreBtn.addEventListener('click', loadMore);
-refs.formSubmit.addEventListener('submit', impactWord);
+  
+refs.loadMoreBtn.addEventListener('click', onLoadMoreButtonClick);
+refs.formSubmit.addEventListener('submit', onFormSubmit);
 
 refs.list.innerHTML = '';
 
-function impactWord(evt) {
+function onFormSubmit(evt) {
   evt.preventDefault();
   // ====================name у submit = searchQuery, додається в elements у currentTarget==================
-  keyWord = evt.currentTarget.elements.searchQuery.value;
+  keyWord = evt.currentTarget.elements.searchQuery.value.trim();
+
+  if (!keyWord) {
+    refs.list.innerHTML = '';
+    Notiflix.Notify.warning('Please enter something to search!');
+    return
+  }
+
   refs.list.innerHTML = '';
   currentPage = 1;
 
   getImages(currentPage, keyWord)
   .then(resp => {
-    if (currentPage <= Math.floor(resp.total/per_page)) {
-      refs.loadMoreBtn.hidden = false;
-    };
 
-    if (resp.totalHits > 0) {
-      Notiflix.Notify.success(`Hooray! We found ${resp.totalHits} images.`);
+    if (resp.data.totalHits > 0) {
+      Notiflix.Notify.success(`Hooray! We found ${resp.data.totalHits} images.`);
     };
     
-    refs.list.insertAdjacentHTML('beforeend', createMarkUp(resp.hits));
+    refs.list.insertAdjacentHTML('beforeend', createMarkUp(resp.data.hits));
+
+    if (currentPage <= Math.floor(resp.data.total/per_page)) {
+      refs.loadMoreBtn.hidden = false;
+    };
   })
-  .catch(err => console.log(err));
 } 
 
 
-// $.getJSON(URL, function(data){
-// if (parseInt(data.totalHits) > 0)
-//     $.each(data.hits, function(i, hit){ console.log(hit.pageURL); });
-// else
-//     console.log('No hits');
-// });
+// function getImages(page=1, keyWord) { 
+//   const params = new URLSearchParams ({
+//     image_type : 'photo',
+//     orientation : 'horizontal',
+//     safesearch : true 
+//   });
 
-
-function getImages(page=1, keyWord) { 
-  const params = new URLSearchParams ({
-    image_type : 'photo',
-    orientation : 'horizontal',
-    safesearch : true 
-  });
-
-  const options = {
-    method: 'GET',
-    headers: {
-    }
-  };
+//   const options = {
+//     method: 'GET',
+//     headers: {
+//     }
+//   };
   
-
-  return fetch(`${BASE_URL}?key=${API_KEY}&q=${keyWord}&${params}&page=${page}&per_page=${per_page}`)
-    .then(resp => {
-      if (!resp.ok) {
-      throw new Error(resp.statusText)
-      } 
-
-      return resp.json();
-    })
-    .catch(err => console.log(err))
-}
-
-// getImages()
-//   .then(resp => {
-//     if (currentPage <= Math.floor(resp.total/per_page)) {
-//       refs.loadMoreBtn.hidden = false;
-//     };
-
-//     if (resp.totalHits > 0) {
-//       Notiflix.Notify.success(`Hooray! We found ${resp.totalHits} images.`);
-//     };
-//     refs.list.insertAdjacentHTML('beforeend', createMarkUp(resp.hits));
-//   })
-//   .catch(err => console.log(err));
+//   return axios.get(`${BASE_URL}?key=${API_KEY}&q=${keyWord}&${params}&page=${page}&per_page=${per_page}`)
+// }
 
 function createMarkUp(arr) {
+
   if (arr.length === 0) {
     refs.loadMoreBtn.hidden = true;
     Notiflix.Notify.failure('Sorry, there are no images matching your search query. Please try again.');
@@ -126,20 +105,18 @@ function createMarkUp(arr) {
   `).join('')
 } 
 
-function loadMore() {
-  
+
+function onLoadMoreButtonClick() {
   currentPage += 1;
 
   getImages(currentPage, keyWord)
   .then(resp => {
-    if (currentPage > Math.floor(resp.total/per_page)) {
+    if (currentPage > Math.floor(resp.data.total/per_page)) {
       Notiflix.Notify.warning("We're sorry, but you've reached the end of search results.");
       refs.loadMoreBtn.hidden = true;
     }
-    refs.list.insertAdjacentHTML('beforeend', createMarkUp(resp.hits))
+    refs.list.insertAdjacentHTML('beforeend', createMarkUp(resp.data.hits))
   })
-  .catch(err => console.log(err));
 }
-
 
 
