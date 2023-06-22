@@ -7,6 +7,7 @@ const API_KEY = '37474712-2dac32f03878bab58bae809d9';
 let per_page = 40;
 
 async function getImages(page=1, keyWord) { 
+
   try {
       const params = new URLSearchParams ({
         image_type : 'photo',

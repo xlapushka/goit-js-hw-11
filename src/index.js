@@ -21,7 +21,6 @@ const refs = {
 
 // refs.loadMoreBtn.addEventListener('click', onLoadMoreButtonClick);
 refs.formSubmit.addEventListener('submit', onFormSubmit);
-
 refs.list.innerHTML = '';
 
 
@@ -62,28 +61,32 @@ async function onFormSubmit(evt) {
   if (!keyWord) {
     refs.list.innerHTML = '';
     Notiflix.Notify.warning('Please enter something to search!');
-    return
-  }
+    return 
+  } 
 
   refs.list.innerHTML = '';
   currentPage = 1;
 
-  try {
-   resp = await getImages(currentPage, keyWord);
+    try {
+      
+    resp = await getImages(currentPage, keyWord);
 
-   if (resp.data.totalHits > 0) {
-      Notiflix.Notify.success(`Hooray! We found ${resp.data.totalHits} images.`);
-    };
+    if (resp.data.totalHits > 0) {
+        Notiflix.Notify.success(`Hooray! We found ${resp.data.totalHits} images.`);
+      };
+  
+    if (resp.data.hits.length === 0 ) {
+        // refs.loadMoreBtn.hidden = true;
+        Notiflix.Notify.failure('Sorry, there are no images matching your search query. Please try again.');
+      } 
+      
+    //  if (currentPage <= Math.floor(resp.data.total/per_page)) {
+    //     // refs.loadMoreBtn.hidden = false;
+    //   }; 
     
-   refs.list.insertAdjacentHTML('beforeend', createMarkUp(resp.data.hits));
-   observer.observe(refs.guard);
-   lightbox.refresh();
-
-   if (currentPage <= Math.floor(resp.data.total/per_page)) {
-      // refs.loadMoreBtn.hidden = false;
-    }; 
-
-    lightbox.refresh();
+    refs.list.insertAdjacentHTML('beforeend', createMarkUp(resp.data.hits));
+    observer.observe(refs.guard);
+    lightbox.refresh()    
     
   } catch (err) {
     Notiflix.Notify.failure("Something went wrong! Please try to reload.");
@@ -93,12 +96,6 @@ async function onFormSubmit(evt) {
 
 
 function createMarkUp(arr) {
-  if (arr.length === 0) {
-    // refs.loadMoreBtn.hidden = true;
-    Notiflix.Notify.failure('Sorry, there are no images matching your search query. Please try again.');
-    
-  };
-
   return arr.map(({ webformatURL, largeImageURL, tags, likes, views, comments, downloads}) => `
  
   <a class="card" href="${largeImageURL}">
@@ -155,9 +152,14 @@ function infinityScroll (entries, observer) {
   entries.forEach(async (entry) => {
     if (entry.isIntersecting) {
           currentPage += 1;
+
+          if (!keyWord) {
+            return 
+          } 
           
           try {
             resp = await getImages(currentPage, keyWord);
+
             if (currentPage > Math.floor(resp.data.total/per_page)) {
               observer.unobserve(refs.guard);
               // Notiflix.Notify.warning("We're sorry, but you've reached the end of search results.");
