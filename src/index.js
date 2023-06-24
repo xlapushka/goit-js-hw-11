@@ -66,9 +66,10 @@ async function onFormSubmit(evt) {
 
   refs.list.innerHTML = '';
   currentPage = 1;
-
+  observer.unobserve(refs.guard);  
+  
     try {
-      
+    
     resp = await getImages(currentPage, keyWord);
 
     if (resp.data.totalHits > 0) {
@@ -150,6 +151,7 @@ function createMarkUp(arr) {
 
 function infinityScroll (entries, observer) {
   entries.forEach(async (entry) => {
+    
     if (entry.isIntersecting) {
           currentPage += 1;
 
@@ -160,9 +162,9 @@ function infinityScroll (entries, observer) {
           try {
             resp = await getImages(currentPage, keyWord);
 
-            if (currentPage > Math.floor(resp.data.total/per_page)) {
+            if (currentPage > Math.floor(resp.data.total/per_page) && (resp.data.total !== 0) && (currentPage !== 2)) {
+              Notiflix.Notify.warning("We're sorry, but you've reached the end of search results.");
               observer.unobserve(refs.guard);
-              // Notiflix.Notify.warning("We're sorry, but you've reached the end of search results.");
             }
             refs.list.insertAdjacentHTML('beforeend', createMarkUp(resp.data.hits));
             lightbox.refresh();
